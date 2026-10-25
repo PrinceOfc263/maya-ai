@@ -1,0 +1,2 @@
+# Maya's initial core uses only Python's standard library.
+# Additional dependencies will be added when we implement voice and AI.
