@@ -1,2 +1,1 @@
-# Maya's initial core uses only Python's standard library.
-# Additional dependencies will be added when we implement voice and AI.
+google-genai>=1.0.0,<3.0.0
