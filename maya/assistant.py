@@ -4,17 +4,24 @@ from maya.ai import MayaAI
 from maya.commands import handle_command
 
 
-BUILTIN_COMMANDS = {"help", "time", "date", "system", "hello", "exit"}
+BUILTIN_COMMANDS = {
+    "help",
+    "time",
+    "date",
+    "system",
+    "hello",
+    "exit",
+}
 
 
 def is_builtin_command(command: str) -> bool:
-    """Keep existing Maya commands separate from AI conversations."""
+    """Recognize existing local commands."""
     normalized = command.strip().lower()
 
     return (
         normalized in BUILTIN_COMMANDS
-        or normalized.startswith("search ")
         or normalized == "search"
+        or normalized.startswith("search ")
         or normalized == "open browser"
     )
 
@@ -24,9 +31,8 @@ def main():
     print("MAYA AI")
     print("Your personal assistant")
     print("=" * 48)
-    print("Maya's core is running.")
-    print("Type 'help' to see available commands.")
-    print("Ask a question naturally to talk to Maya's AI.")
+    print("AI model: Gemini Flash-Lite")
+    print("Type 'help' for commands or ask me anything.")
     print("Type 'exit' to quit.")
 
     assistant = None
@@ -48,40 +54,46 @@ def main():
 
                 if should_exit:
                     break
-
                 continue
 
             if assistant is None:
                 try:
                     print("\nMaya > Connecting to my AI brain...")
                     assistant = MayaAI()
-                    print("Maya > I'm connected. What would you like to discuss?")
+                    print("Maya > Connected.")
                 except Exception as exc:
                     print(
-                        "\nMaya > I couldn't initialize the AI connection. "
-                        f"Error: {type(exc).__name__}: {exc}"
+                        "\nMaya > I couldn't connect to the AI service."
+                        f"\nError: {type(exc).__name__}: {exc}"
                     )
                     print(
-                        "Check your API key, model availability, and "
-                        "internet connection, then restart Maya."
+                        "Check the API key, model access, internet, "
+                        "and API quota."
                     )
                     continue
 
             try:
-                print("\nMaya > Thinking...")
-                answer = assistant.ask(command)
-                print(f"\nMaya > {answer}")
+                print("\nMaya > ", end="", flush=True)
+                received_text = False
+
+                for part in assistant.ask_stream(command):
+                    print(part, end="", flush=True)
+                    received_text = True
+
+                if not received_text:
+                    print("I couldn't produce a text response.")
+
+                print()
+
             except Exception as exc:
                 print(
-                    "\nMaya > I couldn't complete that request. "
-                    f"Error: {type(exc).__name__}: {exc}"
+                    f"\n\nMaya > Request failed: "
+                    f"{type(exc).__name__}: {exc}"
                 )
-                print(
-                    "Check your connection, API quota, and model availability."
-                )
+                print("Check your connection, model access, and API quota.")
 
     except KeyboardInterrupt:
-        print("\nMaya > Stopping Maya. Goodbye!")
+        print("\n\nMaya > Stopping Maya. Goodbye!")
 
     finally:
         if assistant is not None:
